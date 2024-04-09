@@ -1,0 +1,308 @@
+
+
+
+
+
+
+	
+	
+Bermingham IP schema
+-------------------
+
+
+Base network 	192.168.0.0/25
+L3 		10.10.0.0/30
+ISP		180.200.200.0/30
+
+Department	NET address	Mask			Host range		 	 Broadcast add
+	
+VLAN 50		192.168.10.0	255.255.255.128/25	192.168.10.1 - 192.168.10.126	 192.168.10.127
+VLAN 60		192.168.20.0	255.255.255.128/25	192.168.20.1 - 192.168.20.126	 192.168.20.127
+VLAN 70		192.168.30.0	255.255.255.128/25	192.168.30.1 - 192.168.30.126	 192.168.30.127
+VLAN 80		192.168.0.0	255.255.0.0/16		192.168.0.1  - 192.168.255.254	 192.168.255.255
+
+
+
+
+
+	
+	
+	
+Routers & L3 switches
+---------------------
+
+
+Department	NET address	Mask			Host range		 	 Broadcast add
+
+		
+R3 - MS-3	10.10.1.0	255.255.255.252/30	10.10.1.1 - 10.10.1.2	 	 10.10.1.3
+R3 - MS-4	10.10.1.8	255.255.255.252/30	10.10.1.9 - 10.10.1.10	 	 10.10.1.11
+
+R4 - MS-3	10.10.1.4	255.255.255.252/30	10.10.1.5 - 10.10.1.6	 	 10.10.1.7
+R4 - MS-4	10.10.1.12	255.255.255.252/30	10.10.1.13 - 10.10.1.14	 	 10.10.1.15
+	
+	
+	
+	
+	
+
+
+	
+Router & ISP
+-----------
+	
+Department		NET address		Mask			Host range		 	 Broadcast add
+	
+R3-ISP Backup-2		180.200.200.0/30	255.255.255.252		180.200.200.1-180.200.200.2	180.200.200.3
+R3-ISP Main-2		182.200.200.0/30	255.255.255.252		182.200.200.1-182.200.200.2	182.200.200.3
+
+R4-ISP Backup-2		184.200.200.0/30	255.255.255.252		184.200.200.1-184.200.200.2	184.200.200.3
+R4-ISP Main-2		186.200.200.0/30	255.255.255.252		186.200.200.1-186.200.200.2	186.200.200.3
+
+
+
+
+	
+	
+	
+Requirmnets:
+***********
+	
+	1- Network design
+	2- Devices basic settings + SSH + ACL for SSH:---!
+	
+		1.Rename devices
+	
+	3- VLAN creation, blackhole inlcuded, sticky mode mac addressing:---!
+	
+		1.vlan interface access and trunk config, L2--!
+		2.vLAN black hole config, L2--!
+		3.vlan inteface trunk, L3
+
+
+	4- IP schema design table and Assignment---@
+		
+		1.vlan display IP addressing---!
+		2.L3 switch interface conversion to routable interfaces
+		3.L3 switch IP assignment
+		4.Router IP addressing, gig interface
+		5.Routers IP addressing, serial interface
+			
+	5- Routing protocol config, L3 switch and routers
+	
+		1.L3 switch routing protocol adevertising
+		2.router routing protocol advertising
+		3.ISP router routing protocol advertising
+
+		
+	6- servers config
+	
+		1.Statically assign servers IP
+		2-Assign Vlan pools
+		
+	6.1 inter vlan
+		1.assign inter vlan on L3 switch
+		
+	7- PAT and ACL rules on core routers
+	8- Default rout config
+	0- VPN or DMZ??
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	Base network 	192.168.0.0/25
+	L3 		10.10.0.0/30
+	ISP		180.200.200.0/30
+
+	
+3- VLAN creation, blackhole inlcuded, sticky mode mac addressing:---!
+_____________________________________________________________________
+
+		1.vlan interface access and trunk config, L2
+		2.vLAN black hole config, L2
+		3.vlan inteface trunk, L3
+	
+	
+	
+	
+3.1.vlan interface access and trunk config, L2
+3.2.vLAN black hole config, L2
+-----------------------------------------------
+
+
+// switchport	   fa0/1-2 = trunk,
+		   fa0/3-24 = access
+
+switch S11
+VLAN 50
+192.168.10.0/25
+
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+	vlan 50
+	name Finance/Administration
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 50
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+	
+	
+
+
+switch S12
+VLAN 60
+192.168.20.0/25
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+	vlan 60
+	name Admissions/Enrollment
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 60
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+
+
+
+switch S13
+VLAN 70
+192.168.30.0/25
+
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+	vlan 70
+	name Human/Resources
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 70
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+
+
+switch S14
+VLAN 80
+192.168.0.0/16
+
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+
+	vlan 80
+	name Library/BYOD
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 80
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+
+
+	
+	
+	
+3.3.vlan inteface trunking, L3
+------------------------------
+
+// interface gig1/0/5-24 Trunk
+	     gig1/0/1-2  access
+	     gig1/0/3-4  redundent connection not configured
+	     
+	     
+	     
+MS-1 and MS-2
+	      
+	en
+	conf t
+	int range gig1/0/5-24
+	switchport mode trunk
+
+	vlan 50
+	name Finance/Administration
+	vlan 60
+	name Admissions/Enrollment
+	vlan 70
+	name Human/Resources
+	vlan 80
+	name Library "BYOD"
+
+		
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

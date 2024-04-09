@@ -1,0 +1,850 @@
+
+
+
+Artifact_Draft_3
+
+
+>> configurations always off the "Uplink view"
+
+
+NOTE:
+
+
+        10.0.0.0 to 10.255.255.255 (10.0.0.0/8)
+        172.16.0.0 to 172.31.255.255 (172.16.0.0/12)
+        192.168.0.0 to 192.168.255.255 (192.168.0.0/16)
+        127.0.0.0 to 127.255.255.255 is reserved for loopback
+        
+       > l3 SWITCH redundent connection, on gig1/0/3-4 pending configuration, Ethernetchannle
+
+
+
+
+Coventry IP schema:
+******************
+
+
+VLAN schema
+-----------
+	
+	
+Department	NET address	Mask			Host range		 	 Broadcast add
+	
+VLAN 10		172.16.1.0	255.255.255.128/25	172.16.1.1 - 172.16.1.126	 172.16.1.127
+VLAN 20		172.16.2.0	255.255.255.128/25	172.16.2.1 - 172.16.2.126	 172.16.2.127
+VLAN 30		172.16.3.0	255.255.255.128/25	172.16.3.1 - 172.16.3.126	 172.16.3.127
+VLAN 40		172.16.4.0	255.255.255.128/25	172.16.4.1 - 172.16.4.126	 172.16.4.127
+	
+	
+	
+Routers & L3 switches
+---------------------
+172.16.1.0
+
+Department	NET address	Mask			Host range		 	 Broadcast add
+
+		
+R1 - MS-1	172.16.3.144	255.255.255.252/30	172.16.3.145 - 172.16.3.146	 172.16.3.147
+R1 - MS-2	172.16.3.148	255.255.255.252/30	172.16.3.149 - 172.16.3.150	 172.16.3.151
+
+R2 - MS-1	172.16.3.152	255.255.255.252/30	172.16.3.153 - 172.16.3.154	 172.16.3.155
+R2 - MS-2	172.16.3.156	255.255.255.252/30	172.16.3.157 - 172.16.3.158	 172.16.3.159
+	
+
+
+
+Public IP
+---------
+
+195.136.17.0/30,
+195.136.17.4/30,
+195.136.17.8/30,
+195.136.17.12/30,
+
+
+	
+	
+	
+
+
+
+Requirmnets:
+***********
+	
+	1- Network design
+	2- Devices basic settings + SSH + ACL for SSH:---!
+	
+		1.Rename devices
+	
+	3- VLAN creation, blackhole inlcuded, sticky mode mac addressing:---!
+	
+		1.vlan interface access and trunk config, L2
+		2.vLAN black hole config, L2
+		3.vlan inteface trunk, L3
+
+
+	4- IP schema design table and Assignment---@
+		
+		1.vlan display IP addressing---!
+		2.L3 switch interface conversion to routable interfaces
+		3.L3 switch IP assignment
+		4.Router IP addressing, gig interface
+		5.Routers IP addressing, serial interface
+			
+	5- Routing protocol config, L3 switch and routers
+	
+		1.L3 switch routing protocol adevertising
+		2.router routing protocol advertising
+		3.ISP router routing protocol advertising
+
+		
+	6- servers config
+	
+		1.Statically assign servers IP
+		2-Assign Vlan pools
+		
+	6.1 inter vlan
+		1.assign inter vlan on L3 switch
+		
+	7- PAT and ACL rules on core routers
+	8- Default rout config
+	0- VPN or DMZ??
+	
+	
+
+
+
+
+
+3- VLAN creation, blackhole inlcuded, sticky mode mac addressing:---!
+_____________________________________________________________________
+
+		1.vlan interface access and trunk config, L2
+		2.vLAN black hole config, L2
+		3.vlan inteface trunk, L3
+	
+	
+	
+	
+	
+	
+	
+	
+	
+3.1.vlan interface access and trunk config, L2
+3.2.vLAN black hole config, L2
+-----------------------------------------------
+
+
+// switchport	   fa0/1-2 = trunk,
+		   fa0/3-24 = access
+
+switch S1
+VLAN 10
+192.168.10.0/24
+
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+	vlan 10
+	name Finance/Administration
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 10
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+	
+	
+
+
+switch S2
+VLAN 20
+192.168.20.0/24
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+	vlan 20
+	name Admissions/Enrollment
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 20
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+
+
+
+switch S3
+VLAN 30
+192.168.30.0/24
+
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+	vlan 30
+	name Human/Resources
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 30
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+
+
+switch S4
+VLAN 40
+192.168.40.0/24
+
+
+	en
+	conf t
+	int range fa0/1-2
+	switchport mode trunk
+	exit
+	
+	vlan 40
+	name Research/Sponsored
+	vlan 99
+	name BlackHole
+	exit
+	
+	int range fa0/3-24
+	switchport mode access
+	switchport access vlan 40
+	exit
+	
+	int range gig0/1-2
+	switchport mode access
+	switchport access vlan 99
+	exit 
+	
+	do wr
+
+
+	
+	
+	
+3.3.vlan inteface trunking, L3
+---------------------------
+
+// interface gig1/0/5-24 Trunk
+	     gig1/0/1-2  access
+	     gig1/0/3-4  redundent connection not configured
+	     
+	     
+	     
+MS-1 and MS-2
+	      
+	en
+	conf t
+	int range gig1/0/5-24
+	switchport mode trunk
+
+	vlan 10
+	name Finance/Administration
+	vlan 20
+	name Admissions/Enrollment
+	vlan 30
+	name Human/Resources
+	vlan 40
+	name Research/Sponsored
+		
+		
+	
+	
+	
+	
+	
+	
+	
+	
+
+4- IP schema design table and Assignment---@
+____________________________________________
+		
+	1.L3 switch interface conversion to routable interfaces
+	2.L3 switch interface IP assignment
+	3.L3 switch IP assignment
+	4.Router IP addressing, gig interface
+	5.Routers IP addressing, serial interface
+	
+	
+	
+	
+	
+
+
+
+3.1 L3 switch config to no switchport
+-----------------------------------
+
+	en
+	conf t
+	int range gig1/0/1-2
+	no switchport
+
+
+
+
+
+
+4-3.IP assignment to L3 switch
+------------------------------
+
+MS-1
+----
+
+	en
+	config t
+	int gig1/0/1
+	ip add 172.16.3.145 255.255.255.252
+	ex
+
+
+
+	en
+	config t
+	int gig1/0/2
+	ip add 172.16.3.149 255.255.255.252
+	ex
+
+
+
+MS-2
+-----
+
+	en
+	config t
+	int gig1/0/1
+	ip add 172.16.3.153 255.255.255.252
+	ex
+
+
+
+	en
+	config t
+	int gig1/0/2
+	ip add 172.16.3.157 255.255.255.252
+	ex
+
+	
+	
+	
+
+4-4. Router IP addressing gig interface
+---------------------------------------
+
+
+R-1 core
+--------
+
+	en
+	config t
+	int gig0/0
+	ip add 172.16.3.146 255.255.255.252
+	ex
+
+
+
+	en
+	config t
+	int gig0/1
+	ip add 172.16.3.154 255.255.255.252
+	ex
+
+
+
+
+
+R-2 core
+-------
+
+
+	en
+	config t
+	int gig0/0
+	ip add 172.16.3.158 255.255.255.252
+	ex
+
+
+
+	en
+	config t
+	int gig0/1
+	ip add 172.16.3.150 255.255.255.252
+	ex
+
+	
+	
+	
+	
+	
+	
+	
+	
+
+4-5.Routers IP addressing, serial interface
+-------------------------------------------
+
+configure the ISP routers statically with corresponding router's newtwork
+
+ISP Backup-1
+
+Se0/3/0 	195.136.17.2	255.255.255.252
+
+Se0/3/1 	195.136.17.10	255.255.255.252
+
+
+
+ISP Main-1
+
+Se0/3/0 	195.136.17.14	255.255.255.252
+
+Se0/3/1 	195.136.17.6	255.255.255.252
+
+
+
+
+R-1 core
+--------
+
+	en
+	conf t
+	int serial0/3/0
+	ip add 	195.136.17.1 255.255.255.252
+	no shutdown
+	ex
+
+
+
+	en
+	conf t
+	int serial0/3/1
+	ip add 	195.136.17.5 255.255.255.252
+	no shutdown
+	ex
+
+
+
+
+
+R-2 core
+---------
+
+	en
+	conf t
+	int serial0/3/0
+	ip add 	195.136.17.9 255.255.255.252
+	ex
+
+
+
+	en
+	conf t
+	int serial0/3/1
+	ip add 	195.136.17.13 255.255.255.252
+	ex
+
+	
+	
+	
+
+5- Routing protocol config, L3 switch and routers
+________________________________________________
+	
+		1.L3 switch routing protocol adevertising
+		2.router routing protocol advertising
+		3.ISP router routing protocol advertising
+
+
+
+
+
+1.L3 switch routing protocol adevertising
+----------------------------------------
+
+
+
+MS-1
+
+	en
+	conf t  
+	ip routing
+	router eigrp 1
+	network 172.16.1.0  
+	network 172.16.2.0 
+	network 172.16.3.0
+	network 172.16.4.0
+	
+	network 172.16.3.144
+	network 172.16.3.148
+
+
+
+
+
+MS-2
+
+	en
+	conf t  
+	ip routing
+	router eigrp 1
+	network 172.16.1.0  
+	network 172.16.2.0 
+	network 172.16.3.0
+	network 172.16.4.0
+	
+	network 172.16.3.152
+	network 172.16.3.156
+
+
+
+5-2.Router switch routing protocol adevertising
+-----------------------------------------------
+
+
+R-1 Core
+
+	en
+	conf t  
+	ip routing
+	router eigrp 1
+
+
+	network 172.16.3.144
+	network 172.16.3.152
+	
+	network 195.136.17.0
+	network 195.136.17.4
+
+
+ 
+
+R-2 Core
+
+	en
+	conf t  
+	ip routing
+	router eigrp 1
+
+
+	network 172.16.3.148
+	network 172.16.3.156
+	
+	network 195.136.17.8
+	network 195.136.17.12
+
+
+
+
+
+
+
+5-3.ISP Router switch routing protocol adevertising
+________________________________________________
+
+
+
+R-ISP-1
+
+	en
+	conf t  
+	ip routing
+	router eigrp 1
+
+	network 195.136.17.0
+	network 195.136.17.8
+
+
+
+R-ISP-0
+
+	en
+	conf t  
+	ip routing
+	router eigrp 1
+
+
+	network 195.136.17.4
+	network 195.136.17.12
+
+
+
+
+
+6.1.Statically assign servers IP
+-------------------------------
+
+
+	IP add		172.16.4.2
+	mask		255.255.255.128
+	GW		172.16.4.1	
+	DNS		8.8.8.8
+
+
+
+
+
+		
+		
+6.2-Static Assign Vlan pools	
+--------------------------
+
+
+
+
+Finance/AdministrationPool
+172.16.1.1	
+8.8.8.8
+
+172.16.1.10	
+
+255.255.255.128
+
+
+
+Admissions/EnrollmentPool
+172.16.1.1	
+8.8.8.8
+
+172.16.2.10	
+
+255.255.255.128
+
+
+
+
+Human/ResourcesPool
+172.16.1.1	
+8.8.8.8
+
+172.16.3.10	
+
+255.255.255.128
+
+
+
+
+
+
+
+Research/SponsoredPool
+172.16.1.1	
+8.8.8.8
+
+172.16.4.10	
+
+255.255.255.128
+
+
+
+
+
+
+
+
+6-1.assign inter vlan on L3 switch
+___________________________________
+
+
+MS-1 and MS-2
+-------------
+
+
+en
+conf t
+int vlan 10
+ip add 172.16.1.1 255.255.255.128
+ip helper-address 172.16.4.2
+ex
+
+
+en
+conf t
+int vlan 20
+ip add 172.16.2.1 255.255.255.128
+ip helper-address 172.16.4.2
+ex
+
+
+en
+conf t
+int vlan 30
+ip add 172.16.3.1 255.255.255.128
+ip helper-address 172.16.4.2
+ex
+
+
+en
+conf t
+int vlan 40
+ip add 172.16.4.1 255.255.255.128
+ip helper-address 172.16.4.2
+ex
+
+
+
+
+7- PAT and ACL rules on core routers
+____________________________________
+
+1.PAT
+-----
+
+R-1
+---
+	en 
+	conf t
+	int gig0/0
+	int gig0/1
+	ip nat inside
+	
+	
+	int se0/3/0
+	int se0/3/1
+	ip nat outside
+	
+	
+	
+	
+
+	
+	access-list 1 permit 172.16.1.0 0.0.0.3
+	access-list 1 permit 172.16.2.0 0.0.0.3
+	access-list 1 permit 172.16.3.0 0.0.0.3
+	access-list 1 permit 172.16.4.0 0.0.0.3
+	
+	ip nat pool COV 195.136.17.2 195.136.17.3  255.255.255.0
+	ip nat inside source list 1 pool PUBLIC overload
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	ip nat pool PUBLIC2-ips 195.136.17.12 195.136.17.13 0.0.0.255
+		
+	1. label the interfaces
+	2. create a access list to allow network 192.168.1.0/24 to be translated
+	3. create a pool of public IP addresses from 117.45.23.2 to 117.45.23.5
+	4. Enable NAT with PAT
+		
+
+
+mm
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	en 
+	conf t
+	int gig0/0
+	ip nat inside
+	
+	int se0/3/0
+	ip nat outside
+	
+	ip nat inside source list 1 int se0/3/0 overload
+	ip nat inside source list 1 int se0/3/1 overload
+	
+	access-list 1 permit 172.16.1.0 0.0.0.3
+	access-list 1 permit 172.16.1.128 0.0.0.127
+	
+	
+	
+	access-list 1 permit 172.16.2.0 0.0.0.3
+	access-list 1 permit 172.16.3.0 0.0.0.3
+	access-list 1 permit 172.16.4.0 0.0.0.3
+	
+
+
+	
+	
+	R1# show ip nat translations
+	
+	
+	195.136.17.12
+	
+	
+	
+	1- permit acl
+		access-list 1 permit 200.100.50.1 0.0.0.255
+		access-list 1 permit 192.168.20.1 0.0.0.255
+		
+	
+	2- create pool
+		ip nat pool COV 200.100.50.10 200.100.50.20 netmask 255.255.255.0
+	3 - bind nat
+		int gig0/0 
+		ip nat inside
+		int se0/3/0 outside
+		
+	4- enable
+		ip nat inside source list 1 pool COV overload
+	
+	
+	
+	-------------------------------------0000000000000000000---------------------------------
+	
+	
+	Router# show ip nat translations verbose
+
+
